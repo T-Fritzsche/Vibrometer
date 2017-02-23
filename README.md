@@ -5,9 +5,20 @@ Matlab based measurement setup for a vibrometer surface-scan to obtain the
 This sofware was a by-product of my master-thesis at the TU-Darmstadt. I
 had to characterize the mechanical properties of several ultrasonic transducers to verify the simulations I was running in COMSOL-Multiphysics. To increase the accuracy of my reference data I decided to obtain the velocity and displacement at the whole surface area of the transducer. To do so, I used one of the two laser-vibrometers (Polytec OFV-534) we had at our institute. These can measure the velocity in just one point. So to get the whole area covered, I decided to use a small x-y-stage which would move the transducer below the laser-vibrometer and control the complete setup in matlab. 
 
-It features the measurement of:
+## Measurement System
+<img src="doc/images/mech_setup.jpg" width="560"/> <img src="doc/images/mech_setup_detail.jpg" width="320"/>
+The system contains of a Oscilloscope (DSO-X 2002A, Keysight) which is
+connected via VISA-Interface. The transducer under test is excited via
+waveform generator (AFG-2225, GWinstek) and the velocity is measured by a
+laser vibrometer (Polytec OFV-534 head and OFV-3001 evaluation unit) which are
+connected to a PC via serial. To move the transducer two linear axis (UT-100,
+Newport) are controlled via self-made motor control. A acoustic reflector is
+mounted in the course of beam to prevent standing waves.
+
+The setup features the measurement of:
 + velocity
 + displacment
+
 And saves these parameters:
 + time-dependent over 1.5 period
 + in addition to the excitation voltage
@@ -34,33 +45,35 @@ Then ``` open matlab ```, navigate to the folder and ``` run Interface.m```.
 Follow the instructions in the interface to run the measurement.
 
 ### Problems at startup
-In case the application dies with an error message containing *'Connection to devices failed - check and try to reconnect'* make sure the ennumeration of the COM-ports in /functions/connectDevices.m matches the setup. Windows tends to changes the numbers every now and then.
+In case the application dies with an error message containing **'Connection to devices failed - check and try to reconnect'** make sure the ennumeration of the COM-ports in /functions/connectDevices.m matches the setup. Windows tends to changes the numbers every now and then.
 
 ## Results
 Once the measurement was successful a click on ```Evaluate Measurements``` generates three plots of velocity and displacement in **PHASE** and **AMPLITUDE**. Additionally a time-dependent representation is shown in the interface and can be controlled by a slider. All plots and a .mat file with the time-dependent information will be saved in the specified directory.
+
 Plot of the amplitude | Plot of the Phase | Time-dependent
 :----------------------------:|:-------------------------:|:--------:
 ![Displacement of movement (amplitude)](doc/images/velo_amplitude.png)|![Displacement of movement (phase)](doc/images/disp_phase.png)|![Displacment (time dependent)](doc/images/displacement.gif)
 
 
-## System
-<img src="doc/images/mech_setup.jpg" width="560"/> <img src="doc/images/mech_setup_detail.jpg" width="320"/>
-
-
- 
-
-
 ## Usage
+The interface should guide you through the measurement process. Buttons are shown grayed as long as a previous step isn't completed. Evaluation of previous recordet measurement data can be conducted without connection to any measurement devices.
 ![Interface](doc/images/interface.jpg)
-
-###Resultfile
+### Program sequence
 <img src="http://T-Fritzsche.github.io/Vibrometer/doc/images/measurement-routine.svg" width="600">
 
+##Resultfile
+All measurement values will both be stored in one large .mat file and in
+several smaller files for every data point. This should prevent data loss in
+case of power shortage, unexpected windows-updates or other uncontrollable
+failures which result in loosing the matlab cell. Usually the data-specific
+points can be removed if the large .mat cell is complete. 
+
+The cell is either sqare *n x n* or a vector *1 x n* depending on the shape of the scan area. Cell-entries which should not be scanned contain NaN values for the X-Pos and Y-Pos (i.e. outer corners for a circular area).
 ![](http://T-Fritzsche.github.io/Vibrometer/doc/images/datatype-explanation.svg)
 
 # Todo
 As the time has run out and I had to move on the the other tasks of my thesis, some things aren't fully implemented:
-+ The evaluation routine can't distinguish between area (square/circle), line or point plots. So if you did a line plot you'll end up with a 1xn cell which you have the check yourself. There is the function ``` manualEvaluation/evaluateMeasurementLinePlot.m``` which can do it step wise. To integrate it in the full interface some differentiation needs to be added.
++ The evaluation routine can't distinguish between area (square/circle), line or point plots. So if you did a line plot you'll end up with a 1*xn* cell which you have the check yourself. There is the function ``` manualEvaluation/evaluateMeasurementLinePlot.m``` which can do it step wise. To integrate it in the full interface some differentiation needs to be added.
 + The **Auto** function considers the range of the vibrometer only. It would be nice to adapt the scale of the oscilloscope at every measurement point. This would result in the largest repesentable wave-sine and therefore increase the overal resolution.
 
 
