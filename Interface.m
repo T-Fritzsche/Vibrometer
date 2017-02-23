@@ -1646,7 +1646,7 @@ PlotValues.PlotZVelocity=PlotZVelocity;
 PlotValues.PlotZ_t=PlotZ_t;
 PlotValues.overview=overview;
 handles.PlotValues=PlotValues;
-save(fnamepathMsValuesWithPlot,'PlotValues');
+save(fnamepathMsValuesWithPlot,'PlotValues'); %save the generated plots in a file
 RestoreGreyOut(handlesSAVE,handles); %'resume interface'
 
 velMAX=max(overview(:,12));
