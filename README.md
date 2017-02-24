@@ -50,6 +50,37 @@ Plot of the amplitude | Plot of the Phase | Time-dependent
 :----------------------------:|:-------------------------:|:--------:
 ![Displacement of movement (amplitude)](doc/images/velo_amplitude.png)|![Displacement of movement (phase)](doc/images/disp_phase.png)|![Displacment (time dependent)](doc/images/displacement.gif)
 
+## Specifications
+
+Category          | Value
+:----------------:|:------------------
+Exitation voltage | 0-20 V (peak2peak)
+Scan area (max)   | (120x120) mm
+Stepsize	  | 1 µm
+Repeatability     | 4 µm
+
+Velocity resolution of the vibrometer
+
+Measurement range | Full scale output | Resolution | Maximum frequency
+mm/s/V		  | mm/s (pp)         | µm/s/sqrt(Hz)| kHz
+:----------------:|:-----------------:|:----------:|:-----------------
+**OFV-3000**	  | 		      |		   | 
+1		  | 20		      | 0.3	   | 20
+5		  | 100		      | 0.6	   | 50
+25		  | 500		      | 0.8	   | 50
+125		  | 2500	      | 1.0	   | 50
+1000		  | 20000	      | 1.2	   | 50
+**OFV-2520**	  | 		      |		   | 
+5		  | 50		      | 0.2	   | 250
+100		  | 1000	      | 0.5	   | 3000
+1000		  | 10000	      | 2.5	   | 3200
+
+
+Objective		   **20x**|**10x**| Standard
+--------------------:|:--:|:-----:|:----:|:---:|:---:|:----:
+Stand-off distance   | mm | 21.7  | 37.3 | 200 | 300 | 500
+Laser depth-of-field | mm | 0.012 | 0.048| +-1 | +-3 | +-10
+**Spot diameter**    | µm | 1.5   | 3.0  |**25**| 40  | 70
 
 ## Usage
 The interface should guide you through the measurement process. Buttons are shown grayed as long as a previous step isn't completed. Evaluation of previous recordet measurement data can be conducted without connection to any measurement devices.
