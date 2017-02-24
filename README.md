@@ -64,13 +64,13 @@ Velocity resolution of the vibrometer
 Measurement range | Full scale output | Resolution   | Maximum frequency
 :----------------:|:-----------------:|:------------:|:-----------------
 mm/s/V		  | mm/s (pp)         | µm/s/sqrt(Hz)| kHz
-**OFV-3000**	  | **currently used in** |**setup** | 
+**OFV-3000**	  | **(currently used)**|	     | 
 1		  | 20		      | 0.3	     | 20
 5		  | 100		      | 0.6	     | 50
 25		  | 500		      | 0.8	     | 50
 125		  | 2500	      | 1.0	     | 50
 1000		  | 20000	      | 1.2	     | 50
-**OFV-2520**	  | **available option**|	     | 
+**OFV-2520**	  | **(available option)**|	     | 
 5		  | 50		      | 0.2	     | 250
 100		  | 1000	      | 0.5	     | 3000
 1000		  | 10000	      | 2.5	     | 3200
