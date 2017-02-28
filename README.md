@@ -3,7 +3,7 @@ Matlab based measurement setup for a vibrometer surface-scan to obtain the
 **velocity** and **change of displacement**.
 
 This sofware was a by-product of my master-thesis at the TU-Darmstadt. I
-had to characterize the mechanical properties of several ultrasonic transducers to verify the simulations I was running in COMSOL-Multiphysics. To increase the accuracy of my reference data I decided to obtain the velocity and displacement at the whole surface area of the transducer. To do so, I used one of the two laser-vibrometers (Polytec OFV-534) we had at our institute. These can measure the velocity in just one point. So to get the whole area covered, I decided to use a small x-y-stage which would move the transducer below the laser-vibrometer and control the complete setup in matlab. 
+had to characterize the mechanical properties of several ultrasonic transducers to verify the simulations I was running in COMSOL-Multiphysics. To increase the accuracy of my reference data I decided to obtain the velocity and displacement at the whole surface area of the transducer. To do so, I used a laser-vibrometer we had at our institute. These can measure the velocity in just one point. So to get the whole area covered, I decided to use a small x-y-stage which would move the transducer below the laser-vibrometer and control the complete setup in matlab. 
 
 ## Measurement System
 <img src="doc/images/mech_setup.jpg" width="560"/> <img src="doc/images/mech_setup_detail.jpg" width="320"/>
@@ -97,6 +97,7 @@ points can be removed if the large .mat cell is complete.
 
 The cell is either sqare *n x n*, a *1 x n* vector or a *1x1* point depending on the shape of the scan area. Cell-entries that should not be scanned contain NaN values for the X-Pos and Y-Pos (i.e. outer corners for a circular area).
 ![](http://T-Fritzsche.github.io/Vibrometer/doc/images/datatype-explanation.svg)
+Note that the time is given relative to the trigger point so expect a symmetric time around the zero-point.
 
 # Todo
 As the time has run out and I had to move on the the other tasks of my thesis, some things aren't fully implemented:

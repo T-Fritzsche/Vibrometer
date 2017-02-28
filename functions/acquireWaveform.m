@@ -78,7 +78,7 @@ function[waveReturn]=AcquireWaveform(visaObj,Settings)
 
         % store all this information into a waveform structure for later use
         waveform.Format = str2double(preambleBlock1{1});     % This should be 1, since we're specifying INT16 output
-        waveform.Type = str2double(preambleBlock1{2});
+        waveform.Type = str2double(preambleBlock1{2});  
         waveform.Points = str2double(preambleBlock1{3});
         waveform.Count = str2double(preambleBlock1{4});      % This is always 1
         waveform.XIncrement = str2double(preambleBlock1{5}); % in seconds
@@ -92,12 +92,11 @@ function[waveReturn]=AcquireWaveform(visaObj,Settings)
         waveform.SecPerDiv = waveform.Points * waveform.XIncrement/10 ; % seconds
         waveform.Delay = ((waveform.Points/2 - waveform.XReference) * waveform.XIncrement + waveform.XOrigin); % seconds
         % Generate X & Y Data
-        waveform.XData1 = (waveform.XIncrement.*(1:length(waveform.RawData1))) - waveform.XIncrement + waveform.XOrigin;
+        waveform.XData1 = waveform.XIncrement.*(0:waveform.Points-1) + waveform.XOrigin;
         waveform.YData1 = (waveform.YIncrement1.*(waveform.RawData1 - waveform.YReference)) + waveform.YOrigin; 
-        waveform.YData1 = waveform.YData1 - mean(waveform.YData1);
     end
     
-    % Specify data from Channel 2; für Erklärung s. Channel1
+    % Specify data from Channel 2; fï¿½r Erklï¿½rung s. Channel1
     if(Settings.Oszi.CH2EN==1)
         fprintf(visaObj,':WAVEFORM:SOURCE CHAN2'); 
         fprintf(visaObj,':WAVEFORM:FORMAT WORD');
@@ -121,9 +120,8 @@ function[waveReturn]=AcquireWaveform(visaObj,Settings)
         waveform.YReference = str2double(preambleBlock2{10});
         waveform.VoltsPerDiv2 = (INT16tMAX * waveform.YIncrement2 / 8);
         % Generate X & Y Data
-        waveform.XData2 = (waveform.XIncrement.*(1:length(waveform.RawData2))) - waveform.XIncrement + waveform.XOrigin;
+        waveform.XData2 = waveform.XIncrement.*(0:waveform.Points-1) + waveform.XOrigin;
         waveform.YData2 = (waveform.YIncrement2.*(waveform.RawData2 - waveform.YReference)) + waveform.YOrigin; 
-        waveform.YData2 = waveform.YData2 - mean(waveform.YData2);
     end
     % Measurements on display
     for i=1:4

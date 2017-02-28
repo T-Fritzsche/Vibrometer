@@ -25,7 +25,7 @@ try
     % Set the buffer size
     visaOszi.InputBufferSize = 1000000;
     % Set the timeout value
-    visaOszi.Timeout = 1000;
+    visaOszi.Timeout = 5;
     % Set the Byte order
     visaOszi.ByteOrder = 'littleEndian';
     % Open the connection
@@ -63,4 +63,4 @@ catch exceptions
     return
 end
 %empty input buffer
-flushinput(sVibrometer);
+flushinput(sVibrdfsJmeter);

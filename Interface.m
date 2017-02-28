@@ -94,6 +94,8 @@ handles.Settings.Oszi.Aq{4}.Nr=NaN;
 handles.Settings.Vib.AutoSettings=NaN;
 handles.Settings.Vib.VelResNR=NaN;
 
+addpath('functions\');
+
 %% Instruments
 
 %clear all instruments 
@@ -142,8 +144,8 @@ if Sucessfull==1
     d=str2double(handles.ScanAreaWidth.String);
     handles.figure.axesHandle= findobj(gcf,'Tag','axes1');
     handles.hdot=plot(handles.axes1,PosX,PosY,'or','MarkerSize',5,'MarkerFaceColor','r');
-    xlabel('X in ï¿½m');
-    ylabel('Y in ï¿½m');
+    xlabel('X in µm');
+    ylabel('Y in µm');
     title('Scanning Area');
     axis(handles.axes1,[PosX-2*d PosX+2*d PosY-2*d PosY+2*d])
 end
@@ -1204,10 +1206,10 @@ for ix=1:MSSize(2)
             hold on
             if not_done
                 plot(handles.figure.axesHandle,PosX,PosY,'or','MarkerSize',6,'MarkerFaceColor','r');
-                disp(['Measurement Error at X:' num2str(PosX) ' ï¿½m, Y:' num2str(PosY) ' ï¿½m. Nr. of reattemtps: ' num2str(Retry)]);
+                disp(['Measurement Error at X:' num2str(PosX) ' µm, Y:' num2str(PosY) ' µm. Nr. of reattemtps: ' num2str(Retry)]);
             else
                 plot(handles.figure.axesHandle,PosX,PosY,'or','MarkerSize',6,'MarkerFaceColor','g');
-                %disp(['Measurement Successull at X:' num2str(PosX) ' ï¿½m, Y:' num2str(PosY) ' ï¿½m. Nr. of reattemtps: ' num2str(Retry)]);
+                %disp(['Measurement Successull at X:' num2str(PosX) ' µm, Y:' num2str(PosY) ' µm. Nr. of reattemtps: ' num2str(Retry)]);
             end
             hold off
             
@@ -1646,7 +1648,7 @@ PlotValues.PlotZVelocity=PlotZVelocity;
 PlotValues.PlotZ_t=PlotZ_t;
 PlotValues.overview=overview;
 handles.PlotValues=PlotValues;
-save(fnamepathMsValuesWithPlot,'PlotValues'); %save the generated plots in a file
+save(fnamepathMsValuesWithPlot,'PlotValues');
 RestoreGreyOut(handlesSAVE,handles); %'resume interface'
 
 velMAX=max(overview(:,12));
@@ -1658,24 +1660,24 @@ handles.fig.f1=figure;
 surf(PlotX,PlotY,PlotZPhase);
 title('Phaseshift between Velocity and stimulating Amplitude');
 zlabel('Phase in deg');
-xlabel('X in ï¿½m');
-ylabel('Y in ï¿½m');
+xlabel('X in µm');
+ylabel('Y in µm');
 savefig(fnamepathGraphVelo)
 
 handles.fig.f2=figure;
 surf(PlotX,PlotY,PlotZDisplacement);
 title('Absolut Maximum Displacement Value. Not Phase correct');
 zlabel('Displacement in m');
-xlabel('X in ï¿½m');
-ylabel('Y in ï¿½m');
+xlabel('X in µm');
+ylabel('Y in µm');
 savefig(fnamepathGraphDisp)
 
 handles.fig.f3=figure;
 surf(PlotX,PlotY,PlotZVelocity);
 title('Absolut Maximum Velocity Value. Not Phase correct');
 zlabel('Velocity in m/s');
-xlabel('X in ï¿½m');
-ylabel('Y in ï¿½m');
+xlabel('X in µm');
+ylabel('Y in µm');
 savefig(fnamepathGraphPhase)
 
 %plot the time dependend values
@@ -1685,8 +1687,8 @@ zlim([velMIN velMAX]);
 caxis([velMIN velMAX]);
 title('Surface velocity of the transducer');
 zlabel('Velocity in m/s');
-xlabel('X in ï¿½m');
-ylabel('Y in ï¿½m');
+xlabel('X in µm');
+ylabel('Y in µm');
 
 for i=1:length(PlotZ_t{1,1}.Velocity)
         handles.s1.ZData = PlotZ_t{i,1}.Velocity;
@@ -1701,8 +1703,8 @@ zlim([displMIN displMAX]);
 caxis([displMIN displMAX]);
 title('Surface displacement of the transducer');
 zlabel('Displacement in m');
-xlabel('X in ï¿½m');
-ylabel('Y in ï¿½m');
+xlabel('X in µm');
+ylabel('Y in µm');
 
 for i=1:length(PlotZ_t{1,1}.Displacement)
         handles.s2.ZData = PlotZ_t{i,1}.Displacement;
