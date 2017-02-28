@@ -8,6 +8,7 @@ function[Settings]=configureDevices(Settings,sAxis,visaOszi,sFG,sVibrometer)
 %
 %% Configure the Function Generator
 %set frequency, voltage from settings. Offset is 0, and channel is 1
+ fprintf(sFG,'OUTPut1:LOAD INFinity'); %set impedance to 1Meg ohm
  fprintf(sFG,['SOUR1:APPL:SIN ' num2str(Settings.FGen.Freq) 'KHZ,' num2str(Settings.FGen.Vpp) ',0']);
  pause(0.5);
 operationComplete = str2double(query(sFG,'*OPC?'));
@@ -81,8 +82,8 @@ if ~(scope.skipAfterAutoscale)
         fprintf(visaOszi,':CHAN1:PROB 1');
         fprintf(visaOszi,':CHAN1:RANGe 10');
         fprintf(visaOszi,[':CHAN1:SCAL ' num2str(Settings.Oszi.CH1Res) 'V']);
-        fprintf(visaOszi,':CHAN1:UNITs VOLT'); %hinzugefügt
-        fprintf(visaOszi,':CHAN1:VERNier 0'); %hinzugefügt fine vertical adjustment
+        fprintf(visaOszi,':CHAN1:UNITs VOLT'); %hinzugefï¿½gt
+        fprintf(visaOszi,':CHAN1:VERNier 0'); %hinzugefï¿½gt fine vertical adjustment
     else
         fprintf(visaOszi,':CHAN1:DISPlay 0'); %show the waveform
     end
@@ -97,8 +98,8 @@ if ~(scope.skipAfterAutoscale)
         fprintf(visaOszi,':CHAN2:PROB 1');
         fprintf(visaOszi,':CHAN2:RANGe 10');
         fprintf(visaOszi,[':CHAN2:SCAL ' num2str(Settings.Oszi.CH2Res) 'V']);
-        fprintf(visaOszi,':CHAN2:UNITs VOLT'); %hinzugefügt
-        fprintf(visaOszi,':CHAN2:VERNier 0'); %hinzugefügt fine vertical adjustment
+        fprintf(visaOszi,':CHAN2:UNITs VOLT'); %hinzugefï¿½gt
+        fprintf(visaOszi,':CHAN2:VERNier 0'); %hinzugefï¿½gt fine vertical adjustment
     else
         fprintf(visaOszi,':CHAN2:DISPlay 0'); %show the waveform
     end
@@ -106,7 +107,7 @@ if ~(scope.skipAfterAutoscale)
     % Time settings
     fprintf(visaOszi,':TIM:MODE NORM'); 
     if Settings.Oszi.SelTBFromFG %calculate them from the function generator value
-        Settings.Oszi.TimeBase = round(180/(Settings.FGen.Freq),2,'significant'); %in µs
+        Settings.Oszi.TimeBase = round(180/(Settings.FGen.Freq),2,'significant'); %in ï¿½s
     end
 
     fprintf(visaOszi,[':TIM:SCAL ' num2str(Settings.Oszi.TimeBase*1E-06)]) ;
