@@ -97,7 +97,12 @@ points can be removed if the large .mat cell is complete.
 
 The cell is either sqare *n x n*, a *1 x n* vector or a *1x1* point depending on the shape of the scan area. Cell-entries that should not be scanned contain NaN values for the X-Pos and Y-Pos (i.e. outer corners for a circular area).
 ![](http://T-Fritzsche.github.io/Vibrometer/doc/images/datatype-explanation.svg)
-Note that the time is given relative to the trigger point so expect a symmetric time around the zero-point.
+
+Note that the time is given relative to the trigger point so expect a symmetric time around the zero-point. The entries Aq1-Aq4 are measurement values which can be selected in the interface during the measurement. The default is: 
+Aq1=Voltage (peak-to-peak) of channel 2 (mechanical response)
+Aq2=Frequency of channel 1
+Aq3=Frequency of channel 2
+Aq4=Phaseshift between CH1 and CH2
 
 # Todo
 As the time has run out and I had to move on the the other tasks of my thesis, some things aren't fully implemented:
