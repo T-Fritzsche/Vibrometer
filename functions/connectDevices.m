@@ -37,7 +37,7 @@ catch exceptions
 end
 %% Open the interface to the function generator
 try
-    sFG = serial('COM4');
+    sFG = serial('COM3');
     set(sFG,'BaudRate',115200,'Parity','none','Terminator','CR','Timeout',1); 
     fopen(sFG);
     ID=query(sFG,'*IDN?');
@@ -63,4 +63,4 @@ catch exceptions
     return
 end
 %empty input buffer
-flushinput(sVibrdfsJmeter);
+flushinput(sVibrometer);

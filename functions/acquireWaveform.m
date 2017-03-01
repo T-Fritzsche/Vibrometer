@@ -17,7 +17,7 @@ function[waveReturn]=AcquireWaveform(visaObj,Settings)
     
     %% start run
     fprintf(visaObj,':DIGitize');
-    pause(3);
+    pause(0.5);
     operationComplete = str2double(query(visaObj,'*OPC?'));
     while ~operationComplete
         operationComplete = str2double(query(visaObj,'*OPC?'));
@@ -75,7 +75,6 @@ function[waveReturn]=AcquireWaveform(visaObj,Settings)
 
         %  split the preambleBlock into individual pieces of info
         preambleBlock1 = regexp(preambleBlock1,',','split');
-
         % store all this information into a waveform structure for later use
         waveform.Format = str2double(preambleBlock1{1});     % This should be 1, since we're specifying INT16 output
         waveform.Type = str2double(preambleBlock1{2});  
@@ -87,7 +86,8 @@ function[waveReturn]=AcquireWaveform(visaObj,Settings)
         waveform.YIncrement1 = str2double(preambleBlock1{8}); % V
         waveform.YOrigin = str2double(preambleBlock1{9});
         waveform.YReference = str2double(preambleBlock1{10});
-        waveform.VoltsPerDiv1 = (INT16tMAX * waveform.YIncrement1 / 8);      % V maxVal mal die einzelnen Schritte durch 8div
+        %waveform.VoltsPerDiv1 = (INT16tMAX * waveform.YIncrement1 / 8);      % is off by a factor of 1.28 and no one knows why
+        waveform.VoltsPerDiv1 = str2double(query(visaObj,':CHAN1:SCAL?'));
         waveform.Offset = ((INT16tMAX/2 - waveform.YReference) * waveform.YIncrement1 + waveform.YOrigin);         % V
         waveform.SecPerDiv = waveform.Points * waveform.XIncrement/10 ; % seconds
         waveform.Delay = ((waveform.Points/2 - waveform.XReference) * waveform.XIncrement + waveform.XOrigin); % seconds
@@ -118,7 +118,8 @@ function[waveReturn]=AcquireWaveform(visaObj,Settings)
         waveform.YIncrement2 = str2double(preambleBlock2{8}); % V
         waveform.YOrigin = str2double(preambleBlock2{9});
         waveform.YReference = str2double(preambleBlock2{10});
-        waveform.VoltsPerDiv2 = (INT16tMAX * waveform.YIncrement2 / 8);
+        %waveform.VoltsPerDiv2 = (INT16tMAX * waveform.YIncrement2 / 8); % is off by a factor of 1.28 and no one knows why
+        waveform.VoltsPerDiv2 = str2double(query(visaObj,':CHAN2:SCAL?'));
         % Generate X & Y Data
         waveform.XData2 = waveform.XIncrement.*(0:waveform.Points-1) + waveform.XOrigin;
         waveform.YData2 = (waveform.YIncrement2.*(waveform.RawData2 - waveform.YReference)) + waveform.YOrigin; 

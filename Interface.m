@@ -55,7 +55,7 @@ function Interface_OpeningFcn(hObject, eventdata, handles, varargin)
 %load or create data used in the GUIDE
 %% set default values for the menus
 handles.SettFGenFreq.String='39.764375';
-handles.SettFGenVpp.String='20';
+handles.SettFGenVpp.String='2';
 handles.SettOsziAuto.Value=0;
 handles.SettOsziCH1EN.Value=1;
 handles.SettOsziCH1Res.String='5';
@@ -147,6 +147,7 @@ if Sucessfull==1
     xlabel('X in �m');
     ylabel('Y in �m');
     title('Scanning Area');
+    pause(0.1);
     axis(handles.axes1,[PosX-2*d PosX+2*d PosY-2*d PosY+2*d])
 end
 
@@ -267,7 +268,8 @@ function SettOsziCH1EN_Callback(hObject, eventdata, handles)
 % hObject    handle to SettOsziCH1EN (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+%enables channel 1 in case one of the aq1-aq4 measurements need this
+%channel
 % Hint: get(hObject,'Value') returns toggle state of SettOsziCH1EN
 if ~(get(hObject,'Value'))
     %ch1 disabled --> remove measurement options for the channel
@@ -1075,6 +1077,7 @@ function RUNMeasurement_Callback(hObject, eventdata, handles)
 WorkDir= handles.Settings.Path.WorkDir;
 WorkOut= handles.Settings.Path.WorkOut;
 fnameOverview=handles.Settings.Path.fnameOverview;
+handles.Settings=readFromGUI(handles);
 MSStructure=handles.Settings.Measurement.MeasureStructur;
 MSSize=size(MSStructure);
 
@@ -1161,10 +1164,10 @@ for ix=1:MSSize(2)
             while (not_done&&(Retry<=3)&&(get(handles.AbortMeasurement,'UserData')==0))    %repeat measurement if Error result of 9.9E+37
                                
                 iVelocityRes=VelocityRes(VelocityResNr(str2double(query(handles.devices.sVibrometer,'VELO?')))); %the range will be saved as 1,5,125,1000 [mm/V] 
-                iValues=acquireWaveform(handles.devices.visaOszi,handles.Settings);
                 if handles.Settings.Vib.AutoSettings
                     %the best resolution of the vibrometer should be set at
                     %EVERY point!
+                    iValues=acquireWaveform(handles.devices.visaOszi,handles.Settings);
                     iOutOfRange=0;
                     for i=1:3
                         iOutOfRange=iOutOfRange+str2double(query(handles.devices.sVibrometer,'OVR')); %check for out-of-range of vibrometer
@@ -1174,9 +1177,20 @@ for ix=1:MSSize(2)
                     if ((iValues.PhaseShift ==  ErrorValue)||iOutOfRange>0||iValues.Aq1<1||Retry>0||iValues.Aq1>20)
                         %fprintf(handles.devices.visaOszi,':RUN'); %start the oszi during settings change
                         iVelocityRes=VelocityRes(determineBestVibrometerRange40kHz(handles.devices.sVibrometer)); %the range will be saved as 1,5,125,1000 [mm/V]
-                        iValues=acquireWaveform(handles.devices.visaOszi,handles.Settings);
                     end
                 end
+                handles.Settings.Vib.VelResNR=str2double(query(handles.devices.sVibrometer,'VELO?'));
+                
+                if handles.Settings.Oszi.AutoSettings
+                    %if OszilloscopeAutoSettings are on, we should determine
+                    %the resolution of the Oszilloscope at every point
+                   [handles.Settings.Oszi.CH1Res,handles.Settings.Oszi.CH2Res]=adjustOsziScale(visaOszi); 
+                end
+                %write setting changes to interface
+                writeToGUI(handles.Settings);
+                
+                %measure with all (potentially new) settings
+                iValues=acquireWaveform(handles.devices.visaOszi,handles.Settings);
                 
                 if iValues.PhaseShift ==ErrorValue
                     Retry=Retry+1;

@@ -9,6 +9,11 @@ function[Settings]=configureDevices(Settings,sAxis,visaOszi,sFG,sVibrometer)
 %% Configure the Function Generator
 %set frequency, voltage from settings. Offset is 0, and channel is 1
  fprintf(sFG,'OUTPut1:LOAD INFinity'); %set impedance to 1Meg ohm
+ operationComplete = str2double(query(sFG,'*OPC?'));
+while ~(operationComplete==1)
+    operationComplete = str2double(query(sFG,'*OPC?'));
+     pause(0.01);
+end
  fprintf(sFG,['SOUR1:APPL:SIN ' num2str(Settings.FGen.Freq) 'KHZ,' num2str(Settings.FGen.Vpp) ',0']);
  pause(0.5);
 operationComplete = str2double(query(sFG,'*OPC?'));
@@ -29,91 +34,60 @@ fprintf(visaOszi,':STOP');
 
 if Settings.Oszi.AutoSettings
     %Autoscale oszilloscope is selected
-    %do a auto-setup
-    %read the values
-    %save them in Settings.Oszi.WHATEVER!
+    %1. do a auto-setup 
+    %2. and a single measurementdd
+    %3. calculate and set the scale of the oszilloscope
+    %4. save the range in the "Settings" file
+    %5. set the interface values accordingly
+    %6. continue with the rest of the initialization
     fprintf(visaOszi,':AUToscale');
+    %do a single measurement and set the range accordingly
+    [Settings.Oszi.CH1Res,Settings.Oszi.CH2Res]=adjustOsziScale(visaOszi);
     
-    %measure the values
-%     fprintf(visaOszi,':MEASure:VPP CHAN1');
-%     fprintf(visaOszi,':MEASure:VPP CHAN2');
-%     fprintf(visaOszi,':MEASure:FREQuency CHAN1');
-%     fprintf(visaOszi,':MEASure:FREQuency CHAN2');
-    SettingsAutoscale=Settings;
-    SettingsAutoscale.Oszi.CH1EN=query(visaOszi,':CHANnel1:DISPlay?');
-    SettingsAutoscale.Oszi.CH2EN=query(visaOszi,':CHANnel2:DISPlay?');
-    
-    for i=1:4
-        SettingsAutoscale.Oszi.Aq{i}.Str='';
-    end
-    
-    if SettingsAutoscale.Oszi.CH1EN
-        SettingsAutoscale.Oszi.Aq{1}.Str='VPP CHAN1';
-        SettingsAutoscale.Oszi.Aq{3}.Str='FREQuency CHAN1';
-    end
-    if SettingsAutoscale.Oszi.CH2EN
-        SettingsAutoscale.Oszi.Aq{2}.Str='VPP CHAN2';
-        SettingsAutoscale.Oszi.Aq{4}.Str='FREQuency CHAN2';
-    end
-    
-    autoscaleWaveform=acquireWaveform(visaOszi,SettingsAutoscale,0.5,4);
-    
-    
-    %find the smalles frequency and set the timbase accordingly
-    fmin=min(autoscaleWaveform.Aq3,autoscaleWaveform.Aq4);
-    Settings.Oszi.TimeBase = round(0.13/(fmin),3,'significant');
-    Settings.Oszi.SelTBFromFG=0;
-    Settings.Oszi.CH1Res=round((autoscaleWaveform.Aq1/10)*1.1,2,'significant');
-    Settings.Oszi.CH2Res=round((autoscaleWaveform.Aq2/10)*1.1,2,'significant');
-    %would you still like to do the rest with the new values:
-    scope.skipAfterAutoscale=1;
-  
 end
 
-if ~(scope.skipAfterAutoscale)
-    %SET THE VALUES
-    % Channel 1
-    if Settings.Oszi.CH1EN
-        fprintf(visaOszi,':CHAN1:BWLimit 0'); %enable low pass filter
-        fprintf(visaOszi,[':CHAN1:BANDwidth ' num2str(scope.bw)]);%set BW
-        fprintf(visaOszi,':CHAN1:COUP AC');
-        fprintf(visaOszi,':CHAN1:DISPlay 1'); %show the waveform
-        fprintf(visaOszi,':CHAN1:OFFS 0.00');
-        fprintf(visaOszi,':CHAN1:PROB 1');
-        fprintf(visaOszi,':CHAN1:RANGe 10');
-        fprintf(visaOszi,[':CHAN1:SCAL ' num2str(Settings.Oszi.CH1Res) 'V']);
-        fprintf(visaOszi,':CHAN1:UNITs VOLT'); %hinzugef�gt
-        fprintf(visaOszi,':CHAN1:VERNier 0'); %hinzugef�gt fine vertical adjustment
-    else
-        fprintf(visaOszi,':CHAN1:DISPlay 0'); %show the waveform
-    end
+%SET THE REMAINING VALUES
+% Channel 1
+if Settings.Oszi.CH1EN
+    fprintf(visaOszi,':CHAN1:BWLimit 0'); %enable low pass filter
+    fprintf(visaOszi,[':CHAN1:BANDwidth ' num2str(scope.bw)]);%set BW
+    fprintf(visaOszi,':CHAN1:COUP AC');
+    fprintf(visaOszi,':CHAN1:DISPlay 1'); %show the waveform
+    fprintf(visaOszi,':CHAN1:OFFS 0.00');
+    fprintf(visaOszi,':CHAN1:PROB 1');
+    fprintf(visaOszi,':CHAN1:RANGe 10');
+    fprintf(visaOszi,[':CHAN1:SCAL ' num2str(Settings.Oszi.CH1Res) 'V']);
+    fprintf(visaOszi,':CHAN1:UNITs VOLT'); %hinzugef�gt
+    fprintf(visaOszi,':CHAN1:VERNier 0'); %hinzugef�gt fine vertical adjustment
+else
+    fprintf(visaOszi,':CHAN1:DISPlay 0'); %show the waveform
+end
 
-    % Channel 2
-    if Settings.Oszi.CH2EN
-        fprintf(visaOszi,':CHAN2:BWLimit 0'); %enable low pass filter
-        fprintf(visaOszi,[':CHAN2:BANDwidth ' num2str(scope.bw)]);%set BW
-        fprintf(visaOszi,':CHAN2:COUP AC');
-        fprintf(visaOszi,':CHAN2:DISPlay 1'); %show the waveform
-        fprintf(visaOszi,':CHAN2:OFFS 0.00');
-        fprintf(visaOszi,':CHAN2:PROB 1');
-        fprintf(visaOszi,':CHAN2:RANGe 10');
-        fprintf(visaOszi,[':CHAN2:SCAL ' num2str(Settings.Oszi.CH2Res) 'V']);
-        fprintf(visaOszi,':CHAN2:UNITs VOLT'); %hinzugef�gt
-        fprintf(visaOszi,':CHAN2:VERNier 0'); %hinzugef�gt fine vertical adjustment
-    else
-        fprintf(visaOszi,':CHAN2:DISPlay 0'); %show the waveform
-    end
+% Channel 2
+if Settings.Oszi.CH2EN
+    fprintf(visaOszi,':CHAN2:BWLimit 0'); %enable low pass filter
+    fprintf(visaOszi,[':CHAN2:BANDwidth ' num2str(scope.bw)]);%set BW
+    fprintf(visaOszi,':CHAN2:COUP AC');
+    fprintf(visaOszi,':CHAN2:DISPlay 1'); %show the waveform
+    fprintf(visaOszi,':CHAN2:OFFS 0.00');
+    fprintf(visaOszi,':CHAN2:PROB 1');
+    fprintf(visaOszi,':CHAN2:RANGe 10');
+    fprintf(visaOszi,[':CHAN2:SCAL ' num2str(Settings.Oszi.CH2Res) 'V']);
+    fprintf(visaOszi,':CHAN2:UNITs VOLT'); %hinzugef�gt
+    fprintf(visaOszi,':CHAN2:VERNier 0'); %hinzugef�gt fine vertical adjustment
+else
+    fprintf(visaOszi,':CHAN2:DISPlay 0'); %show the waveform
+end
 
-    % Time settings
-    fprintf(visaOszi,':TIM:MODE NORM'); 
-    if Settings.Oszi.SelTBFromFG %calculate them from the function generator value
-        Settings.Oszi.TimeBase = round(180/(Settings.FGen.Freq),2,'significant'); %in �s
-    end
+% Time settings
+fprintf(visaOszi,':TIM:MODE NORM'); 
+if Settings.Oszi.SelTBFromFG %calculate them from the function generator value
+    Settings.Oszi.TimeBase = round(180/(Settings.FGen.Freq),2,'significant'); %in �s
+end
 
-    fprintf(visaOszi,[':TIM:SCAL ' num2str(Settings.Oszi.TimeBase*1E-06)]) ;
+fprintf(visaOszi,[':TIM:SCAL ' num2str(Settings.Oszi.TimeBase*1E-06)]) ;
 
-    
-end %the following functions will be done even if Autoscale did all the rest
+   
  
 % Measurements on display
 for i=1:4
@@ -123,8 +97,9 @@ for i=1:4
 end
 
 %Trigger mode
-fprintf(visaOszi,'TRIGger:MODE EDGE');
-fprintf(visaOszi,'TRIGger:SWEep NORMal');
+fprintf(visaOszi,':TRIGger:MODE EDGE');
+fprintf(visaOszi,':TRIGger:SWEep NORMal');
+%fprintf(visaOszi,':TRIGger:LEVel:ASETup'); %still not fully functional
 
 %Aquisition. Either use the AVERage mode with Count OR the HRESolution!
 %fprintf(visaOszi,':ACQUIRE:TYPE HRESolution');
