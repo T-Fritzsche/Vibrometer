@@ -796,7 +796,7 @@ if strcmp(AreaType,'Square')
     set(handles.SelCurPosLR,    'ENABLE','on')
     set(handles.SelCurPosLRText,'ENABLE','on')
 elseif strcmp(AreaType,'Circle')
-    handles.MeasPointsNumber.String=num2str(ceil((Width/Stepsize)));
+    handles.MeasPointsNumber.String=num2str(ceil(pi*(Width/Stepsize/2)^2)); %according to the gauﬂ-circle-problem 
     %disable the current position possibilities which will not work for the
     %circle
     if (strcmp(handles.SelCurPos.SelectedObject.Tag,'SelCurPosUL') || ...
@@ -835,19 +835,36 @@ elseif strcmp(AreaType,'Point')
     %restrict width options
     set(handles.ScanAreaWidth,'ENABLE','off')
     set(handles.ScanAreaNumSteps,'ENABLE','off')
-% elseif strcmp(AreaType,'Line')
-%     handles.MeasPointsNumber.String='1';
-%     set(handles.SelCurPosUL,'ENABLE','off')
-%     set(handles.SelCurPosCL,'ENABLE','off')
-%     set(handles.SelCurPosLL,'ENABLE','off')
-%     set(handles.SelCurPosUC,'ENABLE','off')
-%     set(handles.SelCurPosLC,'ENABLE','off')
-%     set(handles.SelCurPosUR,'ENABLE','off')
-%     set(handles.SelCurPosURText,'ENABLE','off')
-%     set(handles.SelCurPosCR,'ENABLE','off')
-%     set(handles.SelCurPosCRText,'ENABLE','off')
-%     set(handles.SelCurPosLR,'ENABLE','off')
-%     set(handles.SelCurPosLRText,'ENABLE','off')
+ elseif strcmp(AreaType,'Line  |')
+    handles.MeasPointsNumber.String=num2str(ceil((Width/Stepsize)));
+    set(handles.SelCurPosUL,'ENABLE','off')
+    set(handles.SelCurPosCL,'ENABLE','off')
+    set(handles.SelCurPosLL,'ENABLE','off')
+    set(handles.SelCurPosUC,'ENABLE','on')
+    set(handles.SelCurPosLC,'ENABLE','on')
+    set(handles.SelCurPosUR,'ENABLE','off')
+    set(handles.SelCurPosURText,'ENABLE','off')
+    set(handles.SelCurPosCR,'ENABLE','off')
+    set(handles.SelCurPosCRText,'ENABLE','off')
+    set(handles.SelCurPosLR,'ENABLE','off')
+    set(handles.SelCurPosLRText,'ENABLE','off')
+    set(handles.ScanAreaWidth,'ENABLE','on')
+    set(handles.ScanAreaNumSteps,'ENABLE','on')
+ elseif strcmp(AreaType,'Line  -')
+    handles.MeasPointsNumber.String=num2str(ceil((Width/Stepsize)));
+    set(handles.SelCurPosUL,'ENABLE','off')
+    set(handles.SelCurPosCL,'ENABLE','on')
+    set(handles.SelCurPosLL,'ENABLE','off')
+    set(handles.SelCurPosUC,'ENABLE','off')
+    set(handles.SelCurPosLC,'ENABLE','off')
+    set(handles.SelCurPosUR,'ENABLE','off')
+    set(handles.SelCurPosURText,'ENABLE','off')
+    set(handles.SelCurPosCR,'ENABLE','on')
+    set(handles.SelCurPosCRText,'ENABLE','on')
+    set(handles.SelCurPosLR,'ENABLE','off')
+    set(handles.SelCurPosLRText,'ENABLE','off')
+    set(handles.ScanAreaWidth,'ENABLE','on')
+    set(handles.ScanAreaNumSteps,'ENABLE','on')
 end
 
 
@@ -1856,7 +1873,7 @@ handles.ScanAreaStepsize.String=num2str(ceil(str2double(handles.ScanAreaWidth.St
 if strcmp(AreaType,'Square')
     handles.MeasPointsNumber.String=num2str(NumSteps^2);
 elseif strcmp(AreaType,'Circle')
-    handles.MeasPointsNumber.String=num2str(NumSteps^2);
+    handles.MeasPointsNumber.String=num2str(ceil(pi*(NumSteps/2)^2)); %according to the gauﬂ-circle-problem 
 elseif strcmp(AreaType,'Point')
     handles.MeasPointsNumber.String=num2str(1);
 else

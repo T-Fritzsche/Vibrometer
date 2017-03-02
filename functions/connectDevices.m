@@ -25,7 +25,7 @@ try
     % Set the buffer size
     visaOszi.InputBufferSize = 1000000;
     % Set the timeout value
-    visaOszi.Timeout = 5;
+    visaOszi.Timeout = 15;
     % Set the Byte order
     visaOszi.ByteOrder = 'littleEndian';
     % Open the connection

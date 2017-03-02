@@ -8,7 +8,12 @@ d=Settings.Scanning.DiaWidth;
 stepNum=Settings.Scanning.NumSteps;
 stepwidth=ceil(d/(stepNum-1));
 
-
+%correction for measurement at one point
+if strcmp(Settings.Scanning.Area,'Point')
+    d=0;
+    stepNum=1;
+    stepwidth=0;
+end
 
 %fill CornerPoints with 4 rows of [PosX, PosY]. Then calculate a
 %correction factor and add it to the Matrix
@@ -42,16 +47,16 @@ end
 Outline=ceil(Outline+Correction);
 %check if points are in the valid working area
 if min(Outline(:,1))<0
-    msgbox('Error! Points for x axis are below zero point of the axis');
+    uiwait(msgbox('Error! Points for x axis are below zero point of the axis'));
     return;
 elseif max(Outline(:,1))>120000
-    msgbox('Error! Points for x axis are above maximum of the axis');
+    uiwait(msgbox('Error! Points for x axis are above maximum of the axis'));
     return;
 elseif min(Outline(:,2))<0
-    msgbox('Error! Points for y axis are below zero point of the axis');
+    uiwait(msgbox('Error! Points for y axis are below zero point of the axis'));
     return;
 elseif max(Outline(:,2))>120000
-    msgbox('Error! Points for y axis are above maximum of the axis');
+    uiwait(msgbox('Error! Points for y axis are above maximum of the axis'));
     return;
 end
 
