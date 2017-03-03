@@ -5,175 +5,179 @@ function[MeasureStructur,Outline]=calculateScanningPositions(Settings)
 % outline are returned. The outline can be used as a preview to eliminate erroneous settings.
 
 d=Settings.Scanning.DiaWidth;
-stepNum=Settings.Scanning.NumSteps;
-stepwidth=ceil(d/(stepNum-1));
+stepNum=Settings.Scanning.NumSteps; %number of measurement points
+stepWidth=ceil(d/(stepNum-1));
+PosX=Settings.Scanning.PosX;
+PosY=Settings.Scanning.PosY;
+LocCurrentPos=Settings.Scanning.LocCurrentPos;
+%% corner and center calculation
+% the diameter and number of steps are given relative to a point which does
+% not need to be the center of the shape. So we first need to calculate the
+% 'real' center and the outer corners of the enclosing rectangle.
 
-%correction for measurement at one point
-if strcmp(Settings.Scanning.Area,'Point')
-    d=0;
-    stepNum=1;
-    stepwidth=0;
+%The enclosing rectangle is not necessarily a square so the distance can be
+%different in x and y direction.
+AreaType=Settings.Scanning.Area;
+switch AreaType
+    case 'Square'
+        dx=d;
+        dy=d;
+    case 'Circle'
+        dx=d;
+        dy=d;
+    case 'Line  |'
+        dx=0;
+        dy=d;
+    case 'Line  -'
+        dx=d;
+        dy=0;
+    case 'Point'
+        dx=0;
+        dy=0;
+    otherwise
+        uiwait(msgbox('Error! Area type not implemented!'));
+        return;        
 end
 
-%fill CornerPoints with 4 rows of [PosX, PosY]. Then calculate a
+%fill CornerPoints with 4 rows of [PosY, PosX]. Then calculate a
 %correction factor and add it to the Matrix
 %The sequence of CornerPoints/Correction=P is:
-%   P(1,:)=upper left point     P(4,:)=upper right point
-%   P(2,:)=lower left point     P(3,:)=lower right point
+%   P(1,:)=upper left point         P(4,:)=upper right point
+%                       P(5,:)=CENTER
+%   P(2,:)=lower left point         P(3,:)=lower right point
 
-Outline=repmat([Settings.Scanning.PosX, Settings.Scanning.PosY],4,1);
-Correction=zeros(4,2);
-
-switch Settings.Scanning.LocCurrentPos
-    case 'SelCurPosUL'
-        Correction=[0,0;0,-d;d,-d;d,0];
-    case 'SelCurPosCL'
-        Correction=[0,d/2;0,-d/2;d,-d/2;d,d/2];
-    case 'SelCurPosLL'
-        Correction=[0,d;0,0;d,0;d,d];
-    case 'SelCurPosUC'
-        Correction=[-d/2,0;-d/2,-d;d/2,-d;d/2,0];
-    case 'SelCurPosCC'
-        Correction=[-d/2,d/2;-d/2,-d/2;d/2,-d/2;d/2,d/2];
-    case 'SelCurPosLC'
-        Correction=[-d/2,d;-d/2,0;d/2,0;d/2,d];
-    case 'SelCurPosUR'
-        Correction=[-d,0;-d,-d;0,-d;0,0];
-    case 'SelCurPosCR'
-        Correction=[-d,d/2;-d,-d/2;0,-d/2;0,d/2];
-    case 'SelCurPosLR'
-        Correction=[-d,d;-d,0;0,0;0,d];
+encRect=repmat([PosY, PosX],5,1);
+Correction=zeros(5,2);
+switch LocCurrentPos
+    case 'SelCurPosUL' %upper left(column)
+        Correction=[0,0;-dy,0;-dy,dx;0,dx;-dy/2,dx/2];
+    case 'SelCurPosCL' %center left
+        Correction=[dy/2,0;-dy/2,0;-dy/2,dx;dy/2,dx;0,dx/2];
+    case 'SelCurPosLL' %lower left
+        Correction=[dy,0;0,0;0,dx;dy,dx;dy/2,dx/2];
+    case 'SelCurPosUC' %upper center 
+        Correction=[0,-dx/2;-dy,-dx/2;-dy,dx/2;0,dx/2;-dy/2,0];
+    case 'SelCurPosCC' %center
+        Correction=[dy/2,-dx/2;-dy/2,-dx/2;-dy/2,+dx/2;dy/2,dx/2;0,0];
+    case 'SelCurPosLC' %lower center
+        Correction=[dy,-dx/2;0,-dx/2;0,dx/2;dy,dx/2;dy/2,0];
+    case 'SelCurPosUR' %upper right (column)
+        Correction=[0,-dx;-dy,-dx;-dy,0;0,0;-dy/2,-dx/2];
+    case 'SelCurPosCR' %center right
+        Correction=[dy/2,-dx;-dy/2,-dx;-dy/2,0;dy/2,0;0,-dx/2];
+    case 'SelCurPosLR' %lower right
+        Correction=[dy,-dx;0,-dx;0,0;dy,0;dy/2,-dx/2];
 end
-Outline=ceil(Outline+Correction);
+encRect=ceil(encRect+Correction); %enclosingRectangle
+%some generic points
+Center.Y=encRect(5,1); %encRec(5,:)=Center(y,x)
+Center.X=encRect(5,2); 
+StartP.Y=encRect(1,1); %always start from the left upper corner
+StartP.X=encRect(1,2);
+
+%% Some checks to make sure wo won't leave the area of the stage
+
 %check if points are in the valid working area
-if min(Outline(:,1))<0
+if min(encRect(:,2))<0
     uiwait(msgbox('Error! Points for x axis are below zero point of the axis'));
     return;
-elseif max(Outline(:,1))>120000
+elseif max(encRect(:,2))>120000
     uiwait(msgbox('Error! Points for x axis are above maximum of the axis'));
     return;
-elseif min(Outline(:,2))<0
+elseif min(encRect(:,1))<0
     uiwait(msgbox('Error! Points for y axis are below zero point of the axis'));
     return;
-elseif max(Outline(:,2))>120000
+elseif max(encRect(:,1))>120000
     uiwait(msgbox('Error! Points for y axis are above maximum of the axis'));
     return;
 end
 
-%% Scanning area 
+%% Calculate the point arrays in the scanning area 
 
-%should be a point
+        
+
 if strcmp(Settings.Scanning.Area,'Point')
-    MeasureStructur=cell(3,3);
-    %fill everything exept {2,2} with NaN
-    for ix=1:3
-        for iy=1:3
-            MeasureStructur{iy,ix}.PosX=NaN;
-            MeasureStructur{iy,ix}.PosY=NaN;
-            MeasureStructur{iy,ix}.PosXrelToCenter=NaN;
-            MeasureStructur{iy,ix}.PosYrelToCenter=NaN;
-        end
-    end
-    MeasureStructur{2,2}.PosX=Settings.Scanning.PosX;
-    MeasureStructur{2,2}.PosY=Settings.Scanning.PosY;
-    MeasureStructur{2,2}.PosXrelToCenter=0;
-    MeasureStructur{2,2}.PosYrelToCenter=0;
-    Outline=[Settings.Scanning.PosX, Settings.Scanning.PosY];
+    %% scanning area should be a point
+    MeasureStructur=cell(1,1);
+    MeasureStructur{1,1}.PosX=PosX;
+    MeasureStructur{1,1}.PosY=PosY;
+    MeasureStructur{1,1}.PosXrelToCenter=0;
+    MeasureStructur{1,1}.PosYrelToCenter=0;
+    Outline=[PosY, PosX];
     
-% Scanning area should be a line
+
 elseif strfind(Settings.Scanning.Area,'Line')
+    %% scanning area should be a line 
     % and a horizontal one
     if strfind(Settings.Scanning.Area,'-')
-        xSize = stepNum;
-        ySize = 1;
-        MeasureStructur=cell(ySize,xSize);
-
-        XCenterRel=(xSize/2); 
-        StartP=[min(Outline(:,1)),min(Outline(:,2))+((max(Outline(:,2))- min(Outline(:,2)))/2)];
+        MeasureStructur=cell(1,stepNum); %(ySize,xSize)
+        
         iy=1;
-        for ix=1:xSize
-            MeasureStructur{iy,ix}.PosX=(StartP(1)+(ix-1)*stepwidth);
-            MeasureStructur{iy,ix}.PosY=StartP(2);
-            MeasureStructur{iy,ix}.PosXrelToCenter=(ix-XCenterRel)*stepwidth;
+        for ix=1:stepNum
+            iPosX=(StartP.X+(ix-1)*stepWidth);
+            MeasureStructur{iy,ix}.PosX=iPosX;
+            MeasureStructur{iy,ix}.PosY=StartP.Y;
+            MeasureStructur{iy,ix}.PosXrelToCenter=iPosX-Center.X;
             MeasureStructur{iy,ix}.PosYrelToCenter=0;
         end
-        Outline=[StartP;max(Outline(:,1)),StartP(2)]; 
     % Scanning area should be a vertical line
     elseif strfind(Settings.Scanning.Area,'|')
-        xSize = 1;
-        ySize = stepNum;
-        MeasureStructur=cell(ySize,xSize);
+        MeasureStructur=cell(stepNum,1); %(ySize,xSize)
 
-        YCenterRel=(ySize/2); 
-        StartP=[min(Outline(:,1))+((max(Outline(:,1))- min(Outline(:,1)))/2),min(Outline(:,2))];
         ix=1;
-        for iy=1:ySize
-            MeasureStructur{iy,ix}.PosX=StartP(1);
-            MeasureStructur{iy,ix}.PosY=(StartP(2)+(iy-1)*stepwidth);
+        for iy=1:stepNum
+            iPosY=(StartP.Y-(iy-1)*stepWidth);
+            MeasureStructur{iy,ix}.PosX=StartP.X;
+            MeasureStructur{iy,ix}.PosY=iPosY;
             MeasureStructur{iy,ix}.PosXrelToCenter=0;
-            MeasureStructur{iy,ix}.PosYrelToCenter=(iy-YCenterRel)*stepwidth;
-        end
-        Outline=[StartP;StartP(1),max(Outline(:,2))];
+            MeasureStructur{iy,ix}.PosYrelToCenter=iPosY-Center.Y;
+        end     
     end
-% Scanning area should be a square
-elseif strcmp(Settings.Scanning.Area,'Square')
-    %calculate the number of points to measure
-    xSize= stepNum;
-    ySize= stepNum;
-    %preseve the space needed
-    MeasureStructur=cell(ySize,xSize);
+    Outline=[encRect(1,:),encRect(3,:)];
 
-    XCenterRel=(xSize/2); %floor
-    YCenterRel=(ySize/2); %floor
-    
-    StartP=[min(Outline(:,1)) , max(Outline(:,2))];
-    for ix=1:xSize
-        for iy=1:ySize
-            MeasureStructur{iy,ix}.PosX=(StartP(1)+(ix-1)*stepwidth);
-            MeasureStructur{iy,ix}.PosY=(StartP(2)-(iy-1)*stepwidth);
-            MeasureStructur{iy,ix}.PosXrelToCenter=(ix-XCenterRel)*stepwidth;
-            MeasureStructur{iy,ix}.PosYrelToCenter=(iy-YCenterRel)*stepwidth;
+elseif strcmp(Settings.Scanning.Area,'Square')
+    %% Scanning area should be a square
+    MeasureStructur=cell(stepNum,stepNum);
+
+    for ix=1:stepNum
+        for iy=1:stepNum
+            iPosX=(StartP.X+(ix-1)*stepWidth);
+            iPosY=(StartP.Y-(iy-1)*stepWidth);
+            MeasureStructur{iy,ix}.PosX=iPosX;
+            MeasureStructur{iy,ix}.PosY=iPosY;
+            MeasureStructur{iy,ix}.PosXrelToCenter=iPosX-Center.X;
+            MeasureStructur{iy,ix}.PosYrelToCenter=iPosY-Center.Y;
         end
     end
-    Outline=[Outline;Outline(1,:)];
-    %% Scanning area should be a circle
+    Outline=[encRect(1:4,:);encRect(1,:)];
+    
     
 elseif strcmp(Settings.Scanning.Area,'Circle')
-    %calculate the number of points to measure
-    xSize= stepNum;
-    ySize= stepNum;
-    %preseve the space needed
+    %% Scanning area should be a circle
+    ySize=stepNum;
+    xSize=stepNum;
     MeasureStructur=cell(ySize,xSize);
-
-    XCenterRel=(xSize/2); %floor
-    YCenterRel=(ySize/2); %floor
-    
-    %the center of the scanning area is either already given or will be
-    %calculated by the width, number of points an position
-    ixMiddle=floor(median(Outline(:,1),'omitnan'));
-    iyMiddle=floor(median(Outline(:,2),'omitnan'));
-    
+     
     PosXValues=NaN(ySize,xSize);
-    StartP=[min(Outline(:,1)) , max(Outline(:,2))];
-    for ix=1:xSize
-        for iy=1:ySize
-            PosiX=(StartP(1)+(ix-1)*stepwidth);
-            PosiY=(StartP(2)-(iy-1)*stepwidth);
+    for ix=1:stepNum
+        for iy=1:stepNum
+            iPosX=(StartP.X+(ix-1)*stepWidth);
+            iPosY=(StartP.Y-(iy-1)*stepWidth);
             %check if position is inside the circle via euklidic distance
             %to the center
-            d_euk=sqrt((PosiX-ixMiddle)^2+(PosiY-iyMiddle)^2);
+            d_euk=sqrt((iPosX-Center.X)^2+(iPosY-Center.Y)^2);
              if d_euk<=d/2
-                MeasureStructur{iy,ix}.PosX=PosiX;
-                MeasureStructur{iy,ix}.PosY=PosiY;
-                MeasureStructur{iy,ix}.PosXrelToCenter=(ix-XCenterRel)*stepwidth;
-                MeasureStructur{iy,ix}.PosYrelToCenter=(iy-YCenterRel)*stepwidth;
+                MeasureStructur{iy,ix}.PosX=iPosX;
+                MeasureStructur{iy,ix}.PosY=iPosY;
+                MeasureStructur{iy,ix}.PosXrelToCenter=iPosX-Center.X;
+                MeasureStructur{iy,ix}.PosYrelToCenter=iPosY-Center.Y;
             else
                 MeasureStructur{iy,ix}.PosX=NaN;
                 MeasureStructur{iy,ix}.PosY=NaN;
                 MeasureStructur{iy,ix}.PosXrelToCenter=NaN;
                 MeasureStructur{iy,ix}.PosYrelToCenter=NaN;
             end 
-            PosXValues(iy,ix)=MeasureStructur{iy,ix}.PosX;%save the x positions in a seperate
+            PosXValues(iy,ix)=MeasureStructur{iy,ix}.PosX;%save the x positions seperately
             %we are going to search this in the next step to find the
             %outline of the circle to preview the scanning path
         end

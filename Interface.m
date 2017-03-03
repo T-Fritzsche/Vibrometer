@@ -796,7 +796,7 @@ if strcmp(AreaType,'Square')
     set(handles.SelCurPosLR,    'ENABLE','on')
     set(handles.SelCurPosLRText,'ENABLE','on')
 elseif strcmp(AreaType,'Circle')
-    handles.MeasPointsNumber.String=num2str(ceil(pi*(Width/Stepsize/2)^2)); %according to the gauß-circle-problem 
+    handles.MeasPointsNumber.String=num2str(ceil(pi*(Width/Stepsize/2)^2)); %according to the gauï¿½-circle-problem 
     %disable the current position possibilities which will not work for the
     %circle
     if (strcmp(handles.SelCurPos.SelectedObject.Tag,'SelCurPosUL') || ...
@@ -835,6 +835,10 @@ elseif strcmp(AreaType,'Point')
     %restrict width options
     set(handles.ScanAreaWidth,'ENABLE','off')
     set(handles.ScanAreaNumSteps,'ENABLE','off')
+    %if there is only one point, there is only one step and a diametoer of 0
+    set(handles.ScanAreaWidth.String,'0');
+    set(handles.ScanAreaNumSteps.String,'1');
+    set(handles.ScanAreaStepsize.String,'1');
  elseif strcmp(AreaType,'Line  |')
     handles.MeasPointsNumber.String=num2str(ceil((Width/Stepsize)));
     set(handles.SelCurPosUL,'ENABLE','off')
@@ -926,10 +930,10 @@ for i=1:length(OutlinePoints)
         set(handles.AbortOutlinePreview,'ENABLE','off');
         return %stop the preview by the 'Abort button'
     end  
-    moveStageTo(handles.devices.sAxis,OutlinePoints(i,1), OutlinePoints(i,2))
+    moveStageTo(handles.devices.sAxis,OutlinePoints(i,2), OutlinePoints(i,1))
     axes(handles.axes1);
-    handles.hdot.XData=OutlinePoints(i,1); %move red dot in figure
-    handles.hdot.YData=OutlinePoints(i,2);
+    handles.hdot.XData=OutlinePoints(i,2); %move red dot in figure
+    handles.hdot.YData=OutlinePoints(i,1);
 end
 RestoreGreyOut(handlesSAVE,handles); %'resume interface'
 set(handles.AbortOutlinePreview,'ENABLE','off');
@@ -1869,11 +1873,13 @@ set(hObject,'String',round(str2double(strrep(get(hObject,'String'),',','.')))); 
 
 AreaType = handles.ScanAreaType.String{handles.ScanAreaType.Value,1};
 NumSteps=str2double(handles.ScanAreaNumSteps.String);
-handles.ScanAreaStepsize.String=num2str(ceil(str2double(handles.ScanAreaWidth.String) / str2double(handles.ScanAreaNumSteps.String)));
+ScanAreaWidth=str2double(handles.ScanAreaWidth.String);
+
+handles.ScanAreaStepsize.String=num2str(ceil(ScanAreaWidth/(NumSteps-1)));
 if strcmp(AreaType,'Square')
     handles.MeasPointsNumber.String=num2str(NumSteps^2);
 elseif strcmp(AreaType,'Circle')
-    handles.MeasPointsNumber.String=num2str(ceil(pi*(NumSteps/2)^2)); %according to the gauß-circle-problem 
+    handles.MeasPointsNumber.String=num2str(ceil(pi*(NumSteps/2)^2)); %according to the gauï¿½-circle-problem 
 elseif strcmp(AreaType,'Point')
     handles.MeasPointsNumber.String=num2str(1);
 else
