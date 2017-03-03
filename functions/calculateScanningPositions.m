@@ -115,6 +115,11 @@ elseif strfind(Settings.Scanning.Area,'Line')
         iy=1;
         for ix=1:stepNum
             iPosX=(StartP.X+(ix-1)*stepWidth);
+            %check if we exceeded the enclosing rectangle. The rounded
+            %stepsize reduces an error.
+            if iPosX > encRect(3,2) %x-value of (lower) right corner
+                iPosX=NaN;
+            end
             MeasureStructur{iy,ix}.PosX=iPosX;
             MeasureStructur{iy,ix}.PosY=StartP.Y;
             MeasureStructur{iy,ix}.PosXrelToCenter=iPosX-Center.X;
@@ -127,6 +132,11 @@ elseif strfind(Settings.Scanning.Area,'Line')
         ix=1;
         for iy=1:stepNum
             iPosY=(StartP.Y-(iy-1)*stepWidth);
+            %check if we exceeded the enclosing rectangle. The rounded
+            %stepsize reduces an error.
+            if iPosY < encRect(2,1) %y-value of lower (left) corner
+                iPosY=NaN;
+            end
             MeasureStructur{iy,ix}.PosX=StartP.X;
             MeasureStructur{iy,ix}.PosY=iPosY;
             MeasureStructur{iy,ix}.PosXrelToCenter=0;
@@ -143,6 +153,14 @@ elseif strcmp(Settings.Scanning.Area,'Square')
         for iy=1:stepNum
             iPosX=(StartP.X+(ix-1)*stepWidth);
             iPosY=(StartP.Y-(iy-1)*stepWidth);
+            %check if we exceeded the enclosing rectangle. The rounded
+            %stepsize reduces an error.
+            if iPosX > encRect(3,2) %x-value of (lower) right corner
+                iPosX=NaN;
+            end
+            if iPosY < encRect(2,1) %y-value of lower (left) corner
+                iPosY=NaN;
+            end
             MeasureStructur{iy,ix}.PosX=iPosX;
             MeasureStructur{iy,ix}.PosY=iPosY;
             MeasureStructur{iy,ix}.PosXrelToCenter=iPosX-Center.X;
