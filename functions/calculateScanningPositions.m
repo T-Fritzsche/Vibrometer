@@ -91,6 +91,10 @@ elseif max(encRect(:,1))>120000
     uiwait(msgbox('Error! Points for y axis are above maximum of the axis'));
     return;
 end
+if (d ==0) && ~strcmp(Settings.Scanning.Area,'Point')
+    uiwait(msgbox('Error! Width/Diameter is zero'));
+end
+    
 
 %% Calculate the point arrays in the scanning area 
 

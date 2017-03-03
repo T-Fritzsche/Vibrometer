@@ -836,9 +836,11 @@ elseif strcmp(AreaType,'Point')
     set(handles.ScanAreaWidth,'ENABLE','off')
     set(handles.ScanAreaNumSteps,'ENABLE','off')
     %if there is only one point, there is only one step and a diametoer of 0
-    set(handles.ScanAreaWidth.String,'0');
-    set(handles.ScanAreaNumSteps.String,'1');
-    set(handles.ScanAreaStepsize.String,'1');
+    handles.ScanAreaWidth.String='0';
+    handles.ScanAreaNumSteps.String='1';
+    handles.ScanAreaStepsize.String='1';
+    handles.SelCurPosCC.Value=1;
+    set(handles.SelCurPosCC,'ENABLE','on')
  elseif strcmp(AreaType,'Line  |')
     handles.MeasPointsNumber.String=num2str(ceil((Width/Stepsize)));
     set(handles.SelCurPosUL,'ENABLE','off')
@@ -895,7 +897,7 @@ function ScanAreaWidth_Callback(hObject, eventdata, handles)
 %        str2double(get(hObject,'String')) returns contents of ScanAreaWidth as a double
 set(hObject,'String',round(str2double(strrep(get(hObject,'String'),',','.')))); %set , to . and round to integer
 %width can not be smaler than the step size!
-handles.ScanAreaStepsize.String=num2str(ceil(str2double(handles.ScanAreaWidth.String) / str2double(handles.ScanAreaNumSteps.String)));
+handles.ScanAreaStepsize.String=num2str(ceil(str2double(handles.ScanAreaWidth.String) / (str2double(handles.ScanAreaNumSteps.String)-1)));
 % Save the change you made to the structure
 guidata(hObject,handles);
 
@@ -983,6 +985,7 @@ end
 d=str2double(handles.ScanAreaWidth.String);
 axes(handles.axes1);
 handles.hdot=plot(handles.figure.axesHandle,posx,posy,'or','MarkerSize',5,'MarkerFaceColor','r');
+if d==0; d=5; end
 axis(handles.axes1,[posx-0.6*d posx+0.6*d posy-0.6*d posy+0.6*d])
 hold on
 handles.gridplot=plot(Gridpoints(:,1),Gridpoints(:,2), '.','Parent',handles.axes1);
