@@ -1101,8 +1101,9 @@ function RUNMeasurement_Callback(hObject, eventdata, handles)
 WorkDir= handles.Settings.Path.WorkDir;
 WorkOut= handles.Settings.Path.WorkOut;
 fnameOverview=handles.Settings.Path.fnameOverview;
-handles.Settings=readFromGUI(handles);
 MSStructure=handles.Settings.Measurement.MeasureStructur;
+handles.Settings=readFromGUI(handles);
+handles.Settings.Measurement.MeasureStructur=MSStructure;
 MSSize=size(MSStructure);
 
 ErrorValue=9.9E+37;
