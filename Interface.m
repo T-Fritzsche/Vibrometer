@@ -1105,8 +1105,6 @@ handles.Settings=readFromGUI(handles);
 MSStructure=handles.Settings.Measurement.MeasureStructur;
 MSSize=size(MSStructure);
 
-measurementTime=0.6;
-RetryMax=3;
 ErrorValue=9.9E+37;
 VelocityRes=[1,5,25,125,1000]; %corrects sorting of velocity values of vibrometer
 VelocityResNr=[2,3,4,5,1]; %turn the weird numbering of the vibrometer into a compatible to 'VelocityRes'
@@ -1228,6 +1226,8 @@ for ix=1:MSSize(2)
                     not_done=false;
                 end
             end %of retry the measurement routine
+            %save the voltage+frequency of the wave-generator as well
+            [iValues.iFreqExcitation,iValues.iVppExcitation,~]=getFGSettings(handles.sFG);
             
             %save the data to the MeasurementValues
             iValues.PosX=PosX; %add the position to the save values

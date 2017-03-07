@@ -5,7 +5,7 @@ function[PlotX,PlotY,PlotZPhase,PlotZDisplacement,PlotZVelocity,PlotZ_t,overview
 
 ERRORVAL=9.9E+37;
 
-[ixMAX, iyMAX] = size(MeasurementValues);
+[iyMAX, ixMAX] = size(MeasurementValues);
 %overview=NaN(numel(MeasurementValues),15);
 ifreqAverage=1; %initialize it
 k=1;
