@@ -5,6 +5,8 @@ function[PlotX,PlotY,PlotZPhase,PlotZDisplacement,PlotZVelocity,PlotZ_t,overview
 
 ERRORVAL=9.9E+37;
 
+%the measurement of the 'average' frequency is bad and should not be used
+%anymore. Might still stay due to usage of old measurement data.
 [iyMAX, ixMAX] = size(MeasurementValues);
 %overview=NaN(numel(MeasurementValues),15);
 ifreqAverage=1; %initialize it
@@ -41,16 +43,27 @@ for ix=1:ixMAX
             VResolution = MeasurementValues{iy,ix}.VelocityRes; %resolution is between 1...1000mm/s/V. 
             MeasurementValues{iy,ix}.YVelocity = MeasurementValues{iy,ix}.YData2 * VResolution/1000; %Value in [m/s]
 
-            ifreq=MeasurementValues{iy,ix}.Aq3;
+            %determine the frequency of the signal to calculate the
+            %displacement. An error in the frequency has a high influence
+            %on the calculated displacement. So we want to use the 'known'
+            %frequency of the exciting signal which is way better then the
+            %measured frequency of the oszilloscope. Older measurements do
+            %not know the exciting frequency so we need to use the
+            %measurement values we still have.
+            ifreqMeasured=MeasurementValues{iy,ix}.Aq3;
             ifreqStimulating=MeasurementValues{iy,ix}.Aq2;
-
-            if (isnan(ifreq) ||ifreq>=ERRORVAL)
-                if ifreqStimulating~=ERRORVAL
-                    ifreq=ifreqStimulating; %take waveform of the stimulation wave if the other isn't readable
-                end
+            
+            if isfield(MeasurementValues{iy,ix},'iFreqExcitation')
+                ifreq=MeasurementValues{iy,ix}.iFreqExcitation; %highest accuracy if we know the settings of the signal generator
+            elseif (~isnan(ifreqMeasured) && ifreqMeasured ~=ERRORVAL)
+                ifreq=ifreqMeasured;    %waveform of the velocity-signal
+            elseif ifreqStimulating~=ERRORVAL
+                ifreq=ifreqStimulating; %take waveform of the stimulation wave if the other isn't readable
             else
-                 ifreq=freqAverage;
+                ifreq=freqAverage; %in the worst case use the average measured frequency
             end
+                
+ 
             %the vibrometer has a time delay which is depending on the
             %resolution. To correct this, we change the phaseshift
             %accordingly
